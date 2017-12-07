@@ -1,0 +1,7 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+#ui ignores
+node_modules
+src/bower_components
+
+#backend ignore
