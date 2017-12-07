@@ -9,7 +9,7 @@
   },
   "engines": {
     "node": "6.11.x",
-    "npm":"3.10.x"
+    "npm": "3.10.x"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "jwt-simple": "^0.5.1",
     "moment": "^2.19.3",
     "mongoose": "^4.13.5",
+    "nodemailer": "^4.4.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "request": "^2.83.0",
