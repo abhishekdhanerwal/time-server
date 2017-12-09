@@ -2,6 +2,8 @@ var _ = require('lodash');
 var jwt = require('jwt-simple');
 // var Channel = require('./models/User');
 
+var multer = require('multer');
+
 
 module.exports = function(app) {
 
@@ -11,6 +13,32 @@ module.exports = function(app) {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-type, Authorization');
     next();
   });
+
+
+  // var storage = multer.diskStorage({ //multers disk storage settings
+  //   destination: function (req, file, cb) {
+  //     cb(null, './uploads/')
+  //   },
+  //   filename: function (req, file, cb) {
+  //     var datetimestamp = Date.now();
+  //     cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+  //   }
+  // });
+  // var upload = multer({ //multer settings
+  //   storage: storage
+  // }).single('file');
+
+  /** API path that will upload the files */
+  // app.post('/upload', function(req, res) {
+  //   upload(req,res,function(err){
+  //     if(err){
+  //       res.json({error_code:1,err_desc:err});
+  //       return;
+  //     }
+  //     // console.log(req.file.path)
+  //     res.json({error_code:0,err_desc:null,file:req.file});
+  //   })
+  // });
 
   var jobs = [
     'asf',

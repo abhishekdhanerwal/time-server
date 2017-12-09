@@ -73,7 +73,7 @@ module.exports = function(app) {
 
     var payload = {
       sub: user.id,
-      exp: moment().add(10, 'days').unix()
+      exp: moment().add(10,'days').unix()
     };
     var token = jwt.encode(payload, "secret");
 
