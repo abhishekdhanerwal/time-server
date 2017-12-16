@@ -11,13 +11,11 @@ var UserSchema = new mongoose.Schema({
   profilePic:String,
   email:{
     type:String,
-    unique: true,
     lowercase: true,
     required:true
   },
   mobile:{
     type:String,
-    unique: true,
     maxlength:10,
     minlength:10,
     required:true
@@ -27,8 +25,19 @@ var UserSchema = new mongoose.Schema({
     required:true
   },
   role:{
-    type:userRole.module.role,
+    type:String,
+    enum:userRole.module.role,
     required:true
+  },
+  customerInfo :{
+    age:Number,
+    height:Number,
+    weight:Number,
+    gender:String,
+    dailyActivity:String,
+    goal:String,
+    medicalCondition:Boolean,
+    disease:String
   }
 });
 

@@ -14,6 +14,13 @@ var ProductSchema = new mongoose.Schema({
     },
     image:{
         type:String
+    },
+    discount:{
+        type:Number
+    },
+    discountPrice:{
+        type:Number,
+        required:true
     }
 });
 

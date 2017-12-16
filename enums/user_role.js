@@ -1,3 +1,3 @@
 exports.module = {
-    role:['admin','consumer','deitician']
+    role:['admin','consumer','dietitian']
 };

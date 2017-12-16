@@ -17,9 +17,9 @@ app.use(express.static(__dirname + '/uploads'));
 // emailVerification.sendEmail('abhishekdhanerwal@gmail.com');
 
 var user = require('./routes/userRoute')(app);
-var channel = require('./routes/channelRoute')(app);
 var google = require('./services/googleAuth')(app);
 var product = require('./routes/productRoute')(app);
+var dietitian = require('./routes/DietitianRoute')(app);
 
 
 if(env === 'development'){
@@ -39,14 +39,22 @@ var newUser = new UserModel({
 
 UserModel.findOne({email:newUser.email}, function (err, user) {
     if (err)
-        throw err;
+        res.status(401).send({
+            message: 'Server not responding',
+            error: err
+        });
+        // throw err;
 
     if(!user){
         newUser.save(function (err) {
             if (err)
-                throw err;
-
-            console.log('default user created');
+                res.status(401).send({
+                    message: 'Server not responding',
+                    error: err
+                });
+                // throw err;
+            else
+                console.log('default user created');
         })
     }
     else {
