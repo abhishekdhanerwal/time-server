@@ -2,15 +2,12 @@ var _ = require('lodash');
 var jwt = require('jwt-simple');
 var multer = require('multer');
 var Product = require('../models/Product');
+var ProductSubCategory = require('../models/ProductSubCategory');
+var ProductCategory = require('../models/ProductCategory');
+
+var mongoose = require('mongoose');
 
 module.exports = function(app) {
-
-    app.use(function (req, res, next) {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-type, Authorization');
-        next();
-    });
 
     var storage = multer.diskStorage({ //multers disk storage settings
         destination: function (req, file, cb) {
@@ -40,31 +37,159 @@ module.exports = function(app) {
         };
     });
 
-    app.post('/product/save', function (req,res) {
+    app.post('/product/addCategory', function (req, res) {
+        if(verifyUser(req , res)){
+            ProductCategory.find({name:req.body.name.toUpperCase()}, function (err , category) {
+                if(err)
+                    res.status(400).send({
+                        message: 'Server not responding',
+                        error: err
+                    });
+
+                if(category.length == 0){
+                    var newCategory = new ProductCategory({
+                        name:req.body.name
+                    })
+
+                    newCategory.save(function (err) {
+                        if(err)
+                            res.status(400).send({
+                                message: 'Server not responding',
+                                error: err
+                            });
+                        // throw err;
+                        res.status(200).send({message: 'Category saved'});
+                    })
+                }
+                else {
+                    res.status(400).send({
+                        message: 'Category already present',
+                    });
+                }
+            })
+        }
+    });
+
+    app.get('/product/categoryList', function (req, res) {
+        if(verifyUser(req , res)){
+            ProductCategory.find(function(err, category) {
+                if (err) {
+                    res.json({message: 'error during finding category', error: err});
+                };
+                res.json({message: 'Category found successfully', data: category});
+            });
+        }
+    });
+
+    app.post('/product/addSubCategory/:id', function (req, res) {
+        if(verifyUser(req , res)){
+            ProductSubCategory.find({category: mongoose.Types.ObjectId(req.params.id)}, function (err , subCategory) {
+                if(err)
+                    res.status(400).send({
+                        message: 'Server not responding',
+                        error: err
+                    });
+
+                if(subCategory){
+                    var subCategoryPresent = _.find(subCategory, function(obj) {
+                        return obj.name === req.body.name.toUpperCase();
+                    })
+
+                    if(!subCategoryPresent){
+                      var newSubcategory = new ProductSubCategory({
+                          category:req.params.id,
+                          name:req.body.name
+                      })
+
+                        newSubcategory.save(function (err) {
+                            if(err)
+                                res.status(400).send({
+                                    message: 'Server not responding',
+                                    error: err
+                                });
+                            // throw err;
+                            res.status(200).send({message: 'SubCategory saved'});
+                        })
+                    }
+                    else
+                        res.status(400).send({
+                            message: 'Sub Category already present'
+                        });
+                }
+                else {
+                    res.status(400).send({
+                        message: 'Category not present',
+                    });
+                }
+            })
+        }
+    });
+
+    app.get('/product/subCategoryList/:id', function (req, res) {
+        if(verifyUser(req , res)){
+            ProductSubCategory.find({category:mongoose.Types.ObjectId(req.params.id)},function(err, subCategory) {
+                if (err) {
+                    res.json({message: 'error during finding sub category', error: err});
+                };
+                res.json({message: 'Category found successfully', data: subCategory});
+            });
+        }
+    });
+
+    app.post('/product/save/:id', function (req,res) {
 
         if(verifyUser(req , res)){
             var product = req.body;
 
-            if(verifyProductObject(product, res)){
-                var newProduct = new Product({
-                    name:product.name,
-                    price:product.price,
-                    description:product.description,
-                    image:product.image,
-                    discount:product.discount,
-                    discountPrice:product.discountPrice
-                });
-                newProduct.save(function (err) {
-                    if(err)
-                        res.status(401).send({
-                            message: 'Server not responding',
-                            error: err
-                        });
-                        // throw err;
+            Product.find({subCategory: mongoose.Types.ObjectId(req.params.id)}, function (err , productFromDb) {
+                if(err)
+                    res.status(400).send({
+                        message: 'Server not responding',
+                        error: err
+                    });
 
-                    res.status(200).send({message: 'Product saved'});
-                })
-            };
+                if(productFromDb){
+                    var productPresent = _.find(productFromDb, function(obj) {
+                        return obj.name.toUpperCase() === req.body.name.toUpperCase();
+                    })
+
+                    if(!productPresent){
+                        if(verifyProductObject(product, res)){
+                            var newProduct = new Product({
+                                subCategory:req.params.id,
+                                name:product.name,
+                                price:product.price,
+                                shortDescription:product.shortDescription,
+                                longDescription:product.longDescription,
+                                image:product.image,
+                                inStock:product.inStock,
+                                stockLeft:product.stockLeft,
+                                quantity:product.quantity,
+                                pieceInPacket:product.pieceInPacket
+                            });
+                            newProduct.save(function (err) {
+                                if(err)
+                                    res.status(400).send({
+                                        message: 'Server not responding',
+                                        error: err
+                                    });
+                                // throw err;
+
+                                res.status(200).send({message: 'Product saved'});
+                            })
+                        };
+                    }
+                    else
+                        res.status(400).send({
+                            message: 'Product already present'
+                        });
+                }
+                else {
+                    res.status(400).send({
+                        message: 'Sub category not valid',
+                    });
+                }
+            })
         };
     });
     
@@ -83,7 +208,16 @@ module.exports = function(app) {
     app.get('/product/:id', function (req, res) {
 
         if(verifyUser(req , res)){
-            Product.findById(req.params.id, function(err, product) {
+            Product.findById(req.params.id).populate({
+                path: 'subCategory',
+                model: 'ProductSubCategory',
+                populate: {
+                    path: 'category',
+                    model: 'ProductCategory'
+                }
+            }).
+                // .populate('subCategory').populate('subCategory.category').
+            exec(function(err, product) {
                 if (err) {
                     res.json({message: 'error during find Product', error: err});
                 };
@@ -165,8 +299,6 @@ module.exports = function(app) {
             errs.push('Product name is required');
         if(!product.price)
             errs.push('Product price is required');
-        if(!product.discountPrice)
-            errs.push('Product discount price is required');
 
         if(errs.length > 0)
             res.status(400).send({message: 'Validation error', error:errs});

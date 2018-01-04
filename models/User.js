@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 
+var Dietitian = require('../models/Dietitian');
+
 var userRole = require('../enums/user_role');
 
 var UserSchema = new mongoose.Schema({
@@ -30,14 +32,21 @@ var UserSchema = new mongoose.Schema({
     required:true
   },
   customerInfo :{
+    state:String,
+    city:String,
+    pinCode:Number,
     age:Number,
     height:Number,
     weight:Number,
+    waistSize:Number,
+    hipSize:Number,
     gender:String,
     dailyActivity:String,
     goal:String,
     medicalCondition:Boolean,
-    disease:String
+    disease:String,
+    foodAllergies:Array,
+    dietaryPrefernce:String
   }
 });
 

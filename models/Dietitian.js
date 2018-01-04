@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var userRole = require('../enums/user_role');
 
+var Coupon = require('../models/Coupon');
+
 var DietitianSchema = new mongoose.Schema({
     name: {
         type:String,
@@ -26,28 +28,39 @@ var DietitianSchema = new mongoose.Schema({
     description:{
         type:String
     },
-    address:{
+    state:{
         type:String,
-        required:true
+        uppercase: true
     },
-    price:{
-        type:Number,
-        required:true
+    city:{
+        type:String,
+        lowercase: true
     },
-    discount:{
+    pinCode:{
         type:Number
     },
-    discountPrice:{
-        type:Number,
-        required:true
-    },
-    couponCode:{
-        type:String,
-        required:true
+    price:{
+        type:Number
     },
     active:{
         type:Boolean
-    }
+    },
+    discount: [{
+        discountPercentage: Number,
+        discountFixed: Number,
+        discountPrice: Number,
+        couponId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Coupon'
+        }
+    }]
 });
 
-module.exports = mongoose.model('Dietitan', DietitianSchema);
+DietitianSchema.methods.toJson = function () {
+    var user = this.toObject();
+    delete user.password;
+
+    return user;
+};
+
+module.exports = mongoose.model('Dietitian', DietitianSchema);

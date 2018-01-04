@@ -1,19 +1,11 @@
 var _ = require('lodash');
 var jwt = require('jwt-simple');
 var multer = require('multer');
-var randomstring = require('randomstring');
 var userRole = require('../enums/user_role');
 
 var Dietitian = require('../models/Dietitian');
 
 module.exports = function (app) {
-
-    app.use(function (req, res, next) {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-type, Authorization');
-        next();
-    });
 
     var storage = multer.diskStorage({ //multers disk storage settings
         destination: function (req, file, cb) {
@@ -47,10 +39,8 @@ module.exports = function (app) {
         if(verifyUser(req,res)){
             var dietitian = req.body;
 
-            // var newCouponCode = generateCouponCode();
-
             if(verifyDietitianObject(dietitian,res)){
-                generateCouponCode(function (newCouponCode) {
+
                     var newDietitian = new Dietitian({
                         name:dietitian.name,
                         email:dietitian.email,
@@ -60,14 +50,14 @@ module.exports = function (app) {
                         price:dietitian.price,
                         description:dietitian.description,
                         profilePic:dietitian.profilePic,
-                        discount:dietitian.discount,
-                        discountPrice:dietitian.discountPrice,
-                        active:true,
-                        couponCode:newCouponCode
+                        state:dietitian.state,
+                        city:dietitian.city,
+                        pinCode:dietitian.pinCode,
+                        active:true
                     });
                     newDietitian.save(function (err) {
                         if(err)
-                            res.status(401).send({
+                            res.status(400).send({
                                 message: 'Server not responding',
                                 error: err
                             });
@@ -75,28 +65,9 @@ module.exports = function (app) {
 
                         res.status(200).send({message: 'Dietitian saved'});
                     })
-                })
             }
         }
     });
-
-    function generateCouponCode(callback) {
-        var couponCode = randomstring.generate(7);
-
-        Dietitian.findOne({couponCode:couponCode}, function (err, dietitian) {
-            if (err)
-                res.status(401).send({
-                    message: 'E-mail is wrong',
-                    error: err
-                });
-            // throw err;
-
-            if (dietitian)
-                generateCouponCode();
-            else
-                callback(couponCode);
-        })
-    }
 
     app.get('/dietitian/list', function (req, res) {
 
@@ -209,18 +180,20 @@ module.exports = function (app) {
             errs.push('Dietitian name is required');
         if(!dietitian.price)
             errs.push('Dietitian price is required');
-        if(!dietitian.discountPrice)
-            errs.push('Dietitian discount price is required');
         if(!dietitian.email)
-            errs.push('Email is required')
+            errs.push('Email is required');
         if(!dietitian.mobile)
-            errs.push('Mobile is required')
-        if(!dietitian.address)
-            errs.push('Address is required')
+            errs.push('Mobile is required');
+        if(!dietitian.state)
+            errs.push('State is required');
+        if(!dietitian.city)
+            errs.push('City is required');
+        if(!dietitian.pinCode)
+            errs.push('Pin code is required');
         if(!dietitian.role)
-            errs.push('Role is not defined')
+            errs.push('Role is not defined');
         else if(_.includes(userRole.module.role, dietitian.role) != true)
-            errs.push('Role is not valid')
+            errs.push('Role is not valid');
 
         if(errs.length > 0)
             res.status(400).send({message: 'Validation error', error:errs});
