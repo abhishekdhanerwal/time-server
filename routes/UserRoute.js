@@ -20,13 +20,6 @@ var emailVerification = require('../services/emailVerification');
 
 module.exports = function(app) {
 
-  app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-type, Authorization');
-    next();
-  });
-
     var storage = multer.diskStorage({ //multers disk storage settings
         destination: function (req, file, cb) {
             cb(null, './uploads/user')
@@ -171,29 +164,54 @@ module.exports = function(app) {
     else {
 
       User.findOne({email: req.user.email}, function (err, user) {
-        if (err)
-          res.status(400).send({
-            message: 'Error in finding e-mail',
-            error: err
-          });
+          if (err)
+              res.status(400).send({
+                  message: 'Error in finding e-mail',
+                  error: err
+              });
           // throw err;
 
-        if (!user)
-          return res.status(400).send({message: 'Wrong email'});
+          if (!user) {
+              Dietitian.findOne({email: req.user.email}, function (err, dietitian) {
+                  if (err)
+                      res.status(400).send({
+                          message: 'Error in finding e-mail',
+                          error: err
+                      })
+                  if (!dietitian)
+                      return res.status(400).send({message: 'Wrong email'});
+                  else
+                      dietitian.comparePassword(req.user.password, function (err, isMatch) {
+                          if (err)
+                              res.status(400).send({
+                                  message: 'Error in comparing password',
+                                  error: err
+                              });
+                          // throw err;
 
-        user.comparePassword(req.user.password, function (err, isMatch) {
-          if (err)
-            res.status(400).send({
-              message: 'Error in comparing password',
-              error: err
-            });
-            // throw err;
+                          if (!isMatch)
+                              return res.status(400).send({message: 'Wrong password'});
 
-          if (!isMatch)
-            return res.status(400).send({message: 'Wrong password'});
+                          createSendToken(dietitian, res);
+                      });
+              })
 
-          createSendToken(user, res);
-        });
+          }
+          else {
+              user.comparePassword(req.user.password, function (err, isMatch) {
+                  if (err)
+                      res.status(400).send({
+                          message: 'Error in comparing password',
+                          error: err
+                      });
+                  // throw err;
+
+                  if (!isMatch)
+                      return res.status(400).send({message: 'Wrong password'});
+
+                  createSendToken(user, res);
+              });
+          }
       })
     }
   });
