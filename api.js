@@ -23,16 +23,14 @@ app.use(function (req, res, next) {
     next();
 });
 
-var user = require('./routes/userRoute')(app);
+var user = require('./routes/UserRoute')(app);
+var token = require('./routes/TokenRoute')(app);
 var google = require('./services/googleAuth')(app);
-var product = require('./routes/productRoute')(app);
-var dietitian = require('./routes/DietitianRoute')(app);
-var coupon = require('./routes/CouponRoute')(app);
-var ingredient = require('./routes/IngredientRoute')(app);
+var scheduler = require('./services/scheduler');
 
 
 if(env === 'development'){
-    mongoose.connect('mongodb://127.0.0.1/psjwt');
+    mongoose.connect('mongodb://127.0.0.1/matka');
 }else {
     mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds127938.mlab.com:27938/video_channel_db');
 }
@@ -43,7 +41,10 @@ var newUser = new UserModel({
     email: "abhishek@datiot.com",
     mobile: "9911866043",
     password: "secret",
-    role:"admin"
+    role:"admin",
+    city:"gurgaon",
+    state:"haryana",
+    dateOfBirth: new Date(1994,11,23)
 });
 
 UserModel.findOne({email:newUser.email}, function (err, user) {

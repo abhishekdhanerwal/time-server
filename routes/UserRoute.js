@@ -4,16 +4,13 @@ var moment = require('moment');
 var User = require('../models/User');
 var userRole = require('../enums/user_role');
 
+var request = require('request');
+
 var multer = require('multer');
 
 var randomstring = require('randomstring');
 
-
-var Hired = require('../models/HiredData');
-
 var mongoose = require('mongoose');
-
-var Dietitian = require('../models/Dietitian');
 
 var emailVerification = require('../services/emailVerification');
 
@@ -54,77 +51,49 @@ module.exports = function(app) {
 
     if(verifyUserObject(userFromUi , res)){
 
-        console.log(req.query)
-
-        if(req.query.dietitian == 'true'){
-
-            Dietitian.findOne({email: userFromUi.email}, function (err, user) {
+            User.findOne({mobile: userFromUi.mobile}, function (err, user) {
                 if (err)
                     res.status(400).send({
-                        message: 'E-mail is wrong',
+                        message: 'Server error',
                         error: err
                     });
                 // throw err;
 
                 if (user)
-                    return res.status(400).send({message: 'Email already used'});
-
-                generateCouponCode(function (newCouponCode) {
-                    var newDietitian = new Dietitian({
-                        name: userFromUi.name,
-                        email: userFromUi.email,
-                        mobile: userFromUi.mobile,
-                        password: userFromUi.password,
-                        role:userFromUi.role,
-                        active:true,
-                        couponCode:newCouponCode
-                    });
-                    newDietitian.save(function (err) {
-                        if (err)
-                        res.status(400).send({
-                            message: 'Number or email already registered',
-                            error: err
-                        });
-                        // throw err;
-                        else
-                        createSendToken(newDietitian, res)
-                    })
-                })
-            });
-        }
-        else {
-            User.findOne({email: userFromUi.email}, function (err, user) {
-                if (err)
-                    res.status(400).send({
-                        message: 'E-mail is wrong',
-                        error: err
-                    });
-                // throw err;
-
-                if (user)
-                    return res.status(400).send({message: 'Email already used'});
+                    return res.status(400).send({message: 'Mobile already used'});
 
                 var newUser = new User({
                     name: userFromUi.name,
                     email: userFromUi.email,
                     mobile: userFromUi.mobile,
                     password: userFromUi.password,
-                    role:userFromUi.role
+                    role:userFromUi.role,
+                    city:userFromUi.city,
+                    state:userFromUi.state,
+                    dateOfBirth: userFromUi.dateOfBirth,
+                    points:30
                 });
 
                 newUser.save(function (err) {
                     if (err)
                         res.status(400).send({
-                            message: 'Number or email already registered',
+                            message: 'Server error',
                             error: err
                         });
                     // throw err;
                     else
-                        createSendToken(newUser, res)
-                })
-            });
-        }
+                         createSendToken(newUser, res);
 
+                    // var url = 'https://instantalerts.co/api/web/send/?apikey=69iq54a4m4s4ib0agg135o3y0yfbkbmbu&sender=SEDEMO&to=' + newUser.mobile + '&message= Your password is - secret &format=json';
+                    //
+                    // console.log(url)
+                    // request.post(url, function (error, response, body) {
+                    //     console.log('error:', error); // Print the error if one occurred
+                    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    //     console.log('body:', body); // Print the HTML for the Google homepage.
+                    // });
+                })
+            })
     };
   });
 
@@ -154,8 +123,8 @@ module.exports = function(app) {
 
     var errs = [];
 
-    if(!req.user.email)
-      errs.push('Email is required');
+    if(!req.user.mobile)
+      errs.push('Mobile is required');
     if(!req.user.password)
       errs.push('Password is required');
 
@@ -163,41 +132,15 @@ module.exports = function(app) {
       res.status(400).send({message: 'Validation error', error:errs});
     else {
 
-      User.findOne({email: req.user.email}, function (err, user) {
+      User.findOne({mobile: req.user.mobile}, function (err, user) {
           if (err)
               res.status(400).send({
-                  message: 'Error in finding e-mail',
+                  message: 'Error in finding mobile',
                   error: err
               });
           // throw err;
 
-          if (!user) {
-              Dietitian.findOne({email: req.user.email}, function (err, dietitian) {
-                  if (err)
-                      res.status(400).send({
-                          message: 'Error in finding e-mail',
-                          error: err
-                      })
-                  if (!dietitian)
-                      return res.status(400).send({message: 'Wrong email'});
-                  else
-                      dietitian.comparePassword(req.user.password, function (err, isMatch) {
-                          if (err)
-                              res.status(400).send({
-                                  message: 'Error in comparing password',
-                                  error: err
-                              });
-                          // throw err;
-
-                          if (!isMatch)
-                              return res.status(400).send({message: 'Wrong password'});
-
-                          createSendToken(dietitian, res);
-                      });
-              })
-
-          }
-          else {
+          if (user) {
               user.comparePassword(req.user.password, function (err, isMatch) {
                   if (err)
                       res.status(400).send({
@@ -289,224 +232,13 @@ module.exports = function(app) {
 
     })
 
-  app.put('/user/update', function (req, res) {
-    if(verifyUser(req , res)){
-      var customerInfo = req.body;
-        User.findById(customerInfo.id, function (err, user) {
-          if (err) {
-            res.json({message: 'error during find user', error: err});
-          };
-          if (user) {
-            _.merge(user.customerInfo, customerInfo);
-            user.save(function(err) {
-              if (err) {
-                res.json({message: 'error during user update', error: err});
-              };
-              res.json({message: 'User updated successfully'});
-            });
-          } else {
-            res.json({info: 'User not found'});
-          }
-        })
-    }
-  });
-
-    app.put('/user/addDietitian/:id', function (req, res) {
-        if(verifyUser(req , res)){
-            var dietitianToAdd = req.body;
-            User.findById(req.params.id, function (err, user) {
-                if (err) {
-                    res.json({message: 'error during find user', error: err});
-                };
-                if (user) {
-                    Dietitian.findById(dietitianToAdd.dietitianId, function (err, dietitian) {
-                        if (err) {
-                            res.json({message: 'error during find dietitian', error: err});
-                        }
-
-                        if(dietitian){
-
-                            Hired.find(function(err, hiredList) {
-                                if (err) {
-                                    res.json({message: 'error during finding data', error: err});
-                                };
-
-                                if(!_.find(hiredList, {userId:mongoose.Types.ObjectId(req.params.id)})) {
-
-                                    var newHired = new Hired({
-                                        userId : req.params.id,
-                                        hiredDietitians:{
-                                            dietitianId:dietitianToAdd.dietitianId,
-                                            active:false,
-                                            couponApplied:false,
-                                            feesSchedule:[]
-                                        }
-                                    })
-
-                                    newHired.save(function (err) {
-                                        if (err) {
-                                            res.json({message: 'error during user update', error: err});
-                                        };
-                                        res.json({message: 'User updated successfully'});
-                                    })
-                                    // user.customerInfo.hiredDietitians.push(dietitianToAdd);
-                                }
-                                else {
-                                    var hiredPresent = _.find(hiredList, {userId: mongoose.Types.ObjectId(req.params.id)});
-
-                                    if(!_.find(hiredPresent.hiredDietitians,{dietitianId:mongoose.Types.ObjectId(dietitianToAdd.dietitianId)})){
-                                        hiredPresent.hiredDietitians.push(dietitianToAdd);
-
-                                        hiredPresent.save(function (err) {
-                                            if (err) {
-                                                res.json({message: 'error during hired update', error: err});
-                                            };
-                                            res.json({message: 'Hiring data updated successfully'});
-                                        })
-                                    }
-                                    else {
-                                        res.status(200).send({message:'Dietitian already hired'})
-                                    }
-
-                                }
-                            });
-
-                            // _.merge(user.customerInfo.hiredDietitians, dietitianToAdd);
-                            // if (user.customerInfo.hiredDietitians.indexOf(dietitanId[dietitian._id]) === -1) {
-                            //     user.customerInfo.hiredDietitians.push(dietitian._id);
-                            // }
-                            // user.customerInfo.hiredDietitians.push(dietitian._id);
-                            // user.save(function(err) {
-                            //     if (err) {
-                            //         res.json({message: 'error during user update', error: err});
-                            //     };
-                            //     // res.json({message: 'User updated successfully'});
-                            //     dietitian.save(function(err) {
-                            //         if (err) {
-                            //             res.json({message: 'error during dietitian update', error: err});
-                            //         };
-                            //         res.json({message: 'User & Dietitian updated successfully'});
-                            //     });
-                            // });
-
-                        }
-                        else {
-                            res.json({info: 'Dietitan not found'});
-                        }
-                    })
-
-                } else {
-                    res.json({info: 'User not found'});
-                }
-            })
-        }
-    });
-
-    app.put('/user/dietitianPayment/:id', function (req, res) {
-        if(verifyUser(req , res)){
-            var paymentDetails = req.body;
-            User.findById(req.params.id, function (err, user) {
-                if (err) {
-                    res.json({message: 'error during find user', error: err});
-                };
-                if (user) {
-
-                    Dietitian.findById(paymentDetails.dietitianId, function (err, dietitian) {
-                        if (err) {
-                            res.json({message: 'error during find dietitian', error: err});
-                        }
-
-                        if(dietitian){
-
-                            Hired.find(function(err, hiredList) {
-                                if (err) {
-                                    res.json({message: 'error during finding data', error: err});
-                                };
-
-                                if(_.find(hiredList, {userId:mongoose.Types.ObjectId(req.params.id)})) {
-
-                                    var hiredPresent = _.find(hiredList, {userId: mongoose.Types.ObjectId(req.params.id)});
-
-                                    _.merge(_.find(hiredPresent.hiredDietitians, {dietitianId: mongoose.Types.ObjectId(paymentDetails.dietitianId)}), paymentDetails);
-
-                                        hiredPresent.save(function (err) {
-                                            if (err) {
-                                                res.json({message: 'error during hired update', error: err});
-                                            };
-                                            res.json({message: 'Hiring data updated successfully'});
-                                        })
-                                    }
-                                    else {
-                                        res.status(400).send({message:'Dietitian not added to user'})
-                                    }
-                            });
-                        }
-                        else {
-                            res.json({info: 'Dietitan not found'});
-                        }
-                    })
-
-                } else {
-                    res.json({info: 'User not found'});
-                }
-            })
-        }
-    });
-
-    app.get('/user/dietitianRequestlist',function (req, res) {
-           Hired.find().populate('userId').populate('hiredDietitians.dietitianId'). // only works if we pushed refs to children
-           exec(function (err, users) {
-               if (err) {
-                   res.json({message: 'error during finding users', error: err});
-               };
-               res.json({message: 'Consumers found successfully', data: users});
-           });
-    });
-
-    app.get('/user/hiredDietitian/:id', function (req, res) {
-        Hired.findOne({userId:req.params.id}).populate('hiredDietitians.dietitianId').
-            exec(function (err, dietitians) {
-            if (err) {
-                res.json({message: 'error during finding dietitians', error: err});
-            };
-            res.json({message: 'Dietitians found successfully', data: dietitians});
-
-        })
-    });
-
-    app.get('/user/dietitian/list/:id', function (req, res) {
-
-        if(verifyUser(req , res)){
-            Dietitian.find({active:req.query.status},function(err, dietitians) {
-                if (err) {
-                    res.json({message: 'error during finding dietitians', error: err});
-                };
-
-                Hired.findOne({userId:req.params.id}, function (err, userDietitians) {
-                    if (err) {
-                        res.json({message: 'error during finding dietitians', error: err});
-                    };
-                    _.each(userDietitians.hiredDietitians, function (value, key) {
-                        _.remove(dietitians, function(currentObject) {
-                            return currentObject._id.toString() == value.dietitianId.toString();
-                        });
-                    });
-
-                    res.json({message: 'Dietitians found successfully', data: dietitians});
-
-                });
-            });
-        };
-    });
-
-
     app.get('/auth/verifyEmail', emailVerification.handler);
 
   function verifyUser(req, res) {
     var returnBoolean;
     try {
       var token = req.headers.authorization.split(' ')[1];
-      var payload = jwt.decode(token, "secret");
+      var payload = jwt.decode(token, "matka");
     } catch (err) {
       returnBoolean = err;
       res.status(401).send({
@@ -532,7 +264,7 @@ module.exports = function(app) {
       sub: user.id,
       exp: moment().add(10,'days').unix()
     };
-    var token = jwt.encode(payload, "secret");
+    var token = jwt.encode(payload, "matka");
 
     res.status(200).send({user: user.toJson(), token: token});
   }
