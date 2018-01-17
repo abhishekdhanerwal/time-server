@@ -30,10 +30,10 @@ var scheduler = require('./services/scheduler');
 
 
 if(env === 'development'){
-    mongoose.connect('mongodb://127.0.0.1/matka');
+      mongoose.connect('mongodb://127.0.0.1/matka');
  }else {
-    mongoose.connect('mongodb://CrackTheCrock:Crock989@crack@ds257627.mlab.com:57627/crackthecrock');
- }
+     mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds159997.mlab.com:59997/crackthecrock');
+}
 
 //by default admin
 var newUser = new UserModel({
