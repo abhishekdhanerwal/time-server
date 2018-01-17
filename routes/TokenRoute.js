@@ -79,7 +79,8 @@ module.exports = function(app) {
         tokenDate.setMinutes(0);
         tokenDate.setSeconds(0);
         tokenDate.setMilliseconds(0);
-        Winner.find({date:tokenDate}, function (err , winners) {
+        Winner.find({date:tokenDate}).populate('userId').exec
+        (function (err , winners) {
             if (err) {
                 res.json({message: 'error during find winners', error: err});
             };

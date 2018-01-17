@@ -32,7 +32,7 @@ var scheduler = require('./services/scheduler');
 if(env === 'development'){
     mongoose.connect('mongodb://127.0.0.1/matka');
 }else {
-    mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds127938.mlab.com:27938/video_channel_db');
+    mongoose.connect('mongodb://CrackTheCrock:Crock989crack@ds257627.mlab.com:57627/crackthecrock');
 }
 
 //by default admin
