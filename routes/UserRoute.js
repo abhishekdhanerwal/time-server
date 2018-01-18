@@ -32,9 +32,7 @@ module.exports = function(app) {
 
     /** API path that will upload the files */
     app.post('/user/upload', function(req, res) {
-
-        if(verifyUser(req , res)){
-            upload(req,res,function(err){
+        upload(req,res,function(err){
                 if(err){
                     res.json({error_code:1,err_desc:err});
                     return;
@@ -42,7 +40,6 @@ module.exports = function(app) {
                 // console.log(req.file.path)
                 res.json({error_code:0,err_desc:null,file:req.file});
             })
-        };
     });
 
   app.post('/register', function (req, res) {
