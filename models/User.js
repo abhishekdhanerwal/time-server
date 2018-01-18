@@ -31,14 +31,6 @@ var UserSchema = new mongoose.Schema({
     enum:userRole.module.role,
     required:true
   },
-  city:{
-    type:String,
-    required:true
-  },
-  state:{
-    type:String,
-    required:true
-  },
   dateOfBirth:{
     type:Date,
     required:true

@@ -68,8 +68,6 @@ module.exports = function(app) {
                     mobile: userFromUi.mobile,
                     password: userFromUi.password,
                     role:userFromUi.role,
-                    city:userFromUi.city,
-                    state:userFromUi.state,
                     dateOfBirth: userFromUi.dateOfBirth,
                     points:30
                 });
