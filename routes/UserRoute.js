@@ -14,8 +14,23 @@ var mongoose = require('mongoose');
 
 var emailVerification = require('../services/emailVerification');
 
+var nodemailer = require("nodemailer");
+var transporter = require('nodemailer-smtp-transport');
+
 
 module.exports = function(app) {
+
+    var smtpTransport = nodemailer.createTransport(transporter({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        auth: {
+            user: 'crackthecrock@gmail.com',
+            pass: 'Crock989crack'
+        },
+        tls: {rejectUnauthorized: false},
+        debug:true
+    }));
 
     var storage = multer.diskStorage({ //multers disk storage settings
         destination: function (req, file, cb) {
@@ -150,6 +165,8 @@ module.exports = function(app) {
                   createSendToken(user, res);
               });
           }
+          else
+              return res.status(400).send({message: 'Wrong mobile number'});
       })
     }
   });
@@ -225,6 +242,45 @@ module.exports = function(app) {
             })
         }
 
+    })
+
+    app.post('/user/support/:id', function (req, res) {
+
+        if(verifyUser(req , res)) {
+            User.findById(req.params.id, function (err, user) {
+                if (err) {
+                    res.json({message: 'error during find user', error: err});
+                };
+                if (user) {
+                    var mailOptions = {
+                        to: 'crackthecrock@gmail.com',
+                        subject: req.body.subject,
+                        text: req.body.description + ' via  EMAIL - ' +  user.email
+                    }
+                    console.log(mailOptions);
+                    smtpTransport.sendMail(mailOptions, function (error, response) {
+                        if (error) {
+                            res.json({message: 'Mail cant be sent', error: error});
+                        } else {
+                            res.json({message: 'Mail sent'});
+                        }
+                    });
+                }
+                else
+                    res.json({info: 'User not found'});
+            })
+        }
+    });
+
+    app.get('/user/list', function (req, res) {
+        if(verifyUser(req , res)) {
+            User.find(function (err , users) {
+                if (err) {
+                    res.json({message: 'error during find users', error: err});
+                };
+                res.json({message:'User list generated successfully', data:users})
+            })
+        }
     })
 
     app.get('/auth/verifyEmail', emailVerification.handler);

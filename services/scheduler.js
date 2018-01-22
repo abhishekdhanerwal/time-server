@@ -4,25 +4,28 @@ var User = require('../models/User');
 var Winner = require('../models/Winner');
 var _ = require('lodash');
 
+console.log('Schedule File Here');
+
 var jobMorning = new CronJob({
-    cronTime: '00 00 13 * * *',
+    cronTime: '00 10 15 * * *',
     onTick: function() {
+        console.log('In First Scheduler');
         generateWinner('morning');
     },
-    start: false,
+    start: true,
     timeZone: 'Asia/Kolkata'
 });
-jobMorning.start();
+// jobMorning.start();
 
 var jobEvening = new CronJob({
     cronTime: '00 00 20 * * *',
     onTick: function() {
         generateWinner('evening');
     },
-    start: false,
+    start: true,
     timeZone: 'Asia/Kolkata'
 });
-jobEvening.start();
+// jobEvening.start();
 
 function generateWinner(time) {
     var tokenList = [];
@@ -34,10 +37,14 @@ function generateWinner(time) {
             });
         };
 
+        console.log(tokens)
+
         _.each(tokens , function (value , key) {
             if(value.date.getDate() == new Date().getDate() && value.date.getMonth() == new Date().getMonth() && value.date.getFullYear() == new Date().getFullYear() && value.checkPoint == time)
                 tokenList.push(value);
         });
+
+        console.log(tokenList.length)
 
         if(tokenList.length > 0){
             console.log('First lucky draw - ' + new Date());
