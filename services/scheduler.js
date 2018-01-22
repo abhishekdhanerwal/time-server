@@ -4,10 +4,8 @@ var User = require('../models/User');
 var Winner = require('../models/Winner');
 var _ = require('lodash');
 
-console.log('Schedule File Here');
-
 var jobMorning = new CronJob({
-    cronTime: '00 00 15 * * *',
+    cronTime: '00 00 13 * * *',
     onTick: function() {
         console.log('In First Scheduler');
         generateWinner('morning');
@@ -18,8 +16,9 @@ var jobMorning = new CronJob({
 // jobMorning.start();
 
 var jobEvening = new CronJob({
-    cronTime: '00 17 15 * * *',
+    cronTime: '00 00 20 * * *',
     onTick: function() {
+        console.log('In Second Scheduler');
         generateWinner('evening');
     },
     start: true,
