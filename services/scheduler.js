@@ -7,7 +7,7 @@ var _ = require('lodash');
 console.log('Schedule File Here');
 
 var jobMorning = new CronJob({
-    cronTime: '00 10 15 * * *',
+    cronTime: '00 15 15 * * *',
     onTick: function() {
         console.log('In First Scheduler');
         generateWinner('morning');

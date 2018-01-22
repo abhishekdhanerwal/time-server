@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5a8b561a-ffa3-4635-8936-facef656837c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/TokenRoute.js" afterPath="$PROJECT_DIR$/routes/TokenRoute.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/UserRoute.js" afterPath="$PROJECT_DIR$/routes/UserRoute.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/services/scheduler.js" afterPath="$PROJECT_DIR$/services/scheduler.js" />
     </list>
     <ignored path="eHealth _Backend.iws" />
@@ -306,12 +303,12 @@
       <workItem from="1516015941617" duration="26974000" />
       <workItem from="1516445755422" duration="1511000" />
       <workItem from="1516471441054" duration="2570000" />
-      <workItem from="1516600532878" duration="1676000" />
+      <workItem from="1516600532878" duration="1932000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="245378000" />
+    <option name="totallyTimeSpent" value="245634000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="57" y="21" width="1309" height="747" extended-state="6" />
