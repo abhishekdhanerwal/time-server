@@ -42,6 +42,10 @@ module.exports = function(app) {
             console.log(file);
             console.log(file.fieldname);
             console.log(file.originalname);
+            if(file.originalname.split('%').length > 0){
+                cb(null, file.fieldname + '-' + datetimestamp + '.jpg')
+            }
+            else
             cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
         }
     });
