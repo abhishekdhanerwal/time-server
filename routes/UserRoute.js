@@ -38,6 +38,10 @@ module.exports = function(app) {
         },
         filename: function (req, file, cb) {
             var datetimestamp = Date.now();
+            console.log('file upload');
+            console.log(file);
+            console.log(file.fieldname);
+            console.log(file.originalname);
             cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
         }
     });
