@@ -79,8 +79,12 @@ module.exports = function(app) {
                     email: userFromUi.email,
                     mobile: userFromUi.mobile,
                     password: userFromUi.password,
+                    state: userFromUi.state,
+                    city: userFromUi.city,
                     role:userFromUi.role,
                     dateOfBirth: userFromUi.dateOfBirth,
+                    fbLogin:false,
+                    googleLogin:false,
                     points:30
                 });
 
@@ -170,6 +174,86 @@ module.exports = function(app) {
       })
     }
   });
+
+    app.post('/login/fb', function (req , res) {
+        var fbLogin = req.body;
+
+        User.findOne({email: fbLogin.email}, function (err , user) {
+            if (err) {
+                res.json({message: 'error during find user', error: err});
+            };
+            if (user) {
+                createSendToken(user, res);
+            }
+            else {
+                var newUser = new User({
+                    name: fbLogin.name,
+                    email: fbLogin.email,
+                    profilePic: fbLogin.profilePic,
+                    mobile: '**********',
+                    password: 'secret',
+                    state: 'Facebook',
+                    city: 'fb',
+                    role:fbLogin.role,
+                    dateOfBirth: fbLogin.dateOfBirth,
+                    fbLogin:true,
+                    googleLogin:false,
+                    points:30
+                });
+
+                newUser.save(function (err) {
+                    if (err)
+                        res.status(400).send({
+                            message: 'Server error',
+                            error: err
+                        });
+                    // throw err;
+                    else
+                        createSendToken(newUser, res);
+                })
+            }
+        })
+    })
+
+    app.post('/login/google', function (req , res) {
+        var googleLogin = req.body;
+
+        User.findOne({email: googleLogin.email}, function (err , user) {
+            if (err) {
+                res.json({message: 'error during find user', error: err});
+            };
+            if (user) {
+                createSendToken(user, res);
+            }
+            else {
+                var newUser = new User({
+                    name: googleLogin.name,
+                    email: googleLogin.email,
+                    profilePic: googleLogin.profilePic,
+                    mobile: '**********',
+                    password: 'secret',
+                    state: 'Google',
+                    city: 'google',
+                    role:googleLogin.role,
+                    dateOfBirth: googleLogin.dateOfBirth,
+                    fbLogin:false,
+                    googleLogin:true,
+                    points:30
+                });
+
+                newUser.save(function (err) {
+                    if (err)
+                        res.status(400).send({
+                            message: 'Server error',
+                            error: err
+                        });
+                    // throw err;
+                    else
+                        createSendToken(newUser, res);
+                })
+            }
+        })
+    })
 
     app.put('/user/updatePassword/:id', function (req, res) {
         if(verifyUser(req , res)) {
@@ -272,6 +356,42 @@ module.exports = function(app) {
         }
     });
 
+    app.post('/forgotPassword' , function (req, res) {
+        User.findOne({mobile: req.query.phoneNo},function (err, user) {
+            if (err) {
+                res.json({message: 'error during find user', error: err});
+            };
+            if (user) {
+                var newPassword = randomstring.generate(7);
+                var mailOptions = {
+                    to: user.email,
+                    subject: 'New Password',
+                    text: 'Your new password is - '+ newPassword
+                }
+                console.log(mailOptions);
+                smtpTransport.sendMail(mailOptions, function (error, response) {
+                    if (error) {
+                        res.json({message: 'Mail cant be sent', error: error});
+                    } else {
+                        user.password = newPassword;
+                        user.save(function (err) {
+                            if (err)
+                                res.status(400).send({
+                                    message: 'Server error',
+                                    error: err
+                                });
+                            else
+                                res.json({message: 'Mail sent'});
+                        })
+
+                    }
+                });
+            }
+            else
+                res.json({info: 'User not found'});
+        })
+    })
+
     app.get('/user/list', function (req, res) {
         if(verifyUser(req , res)) {
             User.find(function (err , users) {
@@ -329,8 +449,6 @@ module.exports = function(app) {
       errs.push('Email is required')
     if(!user.mobile)
       errs.push('Mobile is required')
-    if(!user.password)
-      errs.push('Password is required')
     if(!user.role)
       errs.push('Role is not defined')
     else if(_.includes(userRole.module.role, user.role) != true)

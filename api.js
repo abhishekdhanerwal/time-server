@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 
 var UserModel = require('./models/User');
 
+var firebase = require("firebase");
+
 var emailVerification = require('./services/emailVerification');
 
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -22,6 +24,14 @@ app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-type, Authorization');
     next();
 });
+
+var config = {
+    apiKey: "AIzaSyBtauLk86wlanubPIbFdPOfyfL4Hvj1XZE",
+    authDomain: "crack-the-crock.firebaseapp.com",
+    // databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
+    // storageBucket: "<BUCKET>.appspot.com",
+};
+firebase.initializeApp(config);
 
 var user = require('./routes/UserRoute')(app);
 var token = require('./routes/TokenRoute')(app);

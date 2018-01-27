@@ -20,6 +20,8 @@
     "crypto": "^1.0.1",
     "express": "^4.16.2",
     "file-system": "^2.2.2",
+    "firebase": "^4.9.0",
+    "firebase-admin": "^5.8.1",
     "fs": "0.0.1-security",
     "js-sha512": "^0.7.1",
     "jwt-simple": "^0.5.1",

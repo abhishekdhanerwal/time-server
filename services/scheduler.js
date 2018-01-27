@@ -70,6 +70,8 @@ function generateWinner(time) {
                             value.won = true;
                     })
 
+                    user.points = user.points+50;
+
                     user.save(function (err) {
                         if (err)
                             console.log({

@@ -22,9 +22,19 @@ var UserSchema = new mongoose.Schema({
     minlength:10,
     required:true
   },
-  password: {
+  otp:{
+    type:Number
+  },
+  state: {
     type:String,
     required:true
+  },
+  city: {
+    type:String,
+    required:true
+  },
+  password: {
+    type:String
   },
   role:{
     type:String,
@@ -37,6 +47,12 @@ var UserSchema = new mongoose.Schema({
   },
   points:{
     type:Number
+  },
+  fbLogin:{
+    type:Boolean
+  },
+  googleLogin:{
+    type:Boolean
   },
   history:[{
       token:{
