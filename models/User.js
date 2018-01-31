@@ -22,9 +22,6 @@ var UserSchema = new mongoose.Schema({
     minlength:10,
     required:true
   },
-  otp:{
-    type:Number
-  },
   state: {
     type:String,
     required:true

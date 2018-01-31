@@ -38,10 +38,10 @@ module.exports = function(app) {
         },
         filename: function (req, file, cb) {
             var datetimestamp = Date.now();
-            console.log('file upload');
-            console.log(file);
-            console.log(file.fieldname);
-            console.log(file.originalname);
+            // console.log('file upload');
+            // console.log(file);
+            // console.log(file.fieldname);
+            // console.log(file.originalname);
             if(file.originalname.split('%').length > 0){
                 cb(null, file.fieldname + '-' + datetimestamp + '.jpg')
             }
@@ -349,7 +349,7 @@ module.exports = function(app) {
                         subject: req.body.subject,
                         text: req.body.description + ' via  EMAIL - ' +  user.email
                     }
-                    console.log(mailOptions);
+                    // console.log(mailOptions);
                     smtpTransport.sendMail(mailOptions, function (error, response) {
                         if (error) {
                             res.json({message: 'Mail cant be sent', error: error});
@@ -376,7 +376,7 @@ module.exports = function(app) {
                     subject: 'New Password',
                     text: 'Your new password is - '+ newPassword
                 }
-                console.log(mailOptions);
+                // console.log(mailOptions);
                 smtpTransport.sendMail(mailOptions, function (error, response) {
                     if (error) {
                         res.json({message: 'Mail cant be sent', error: error});

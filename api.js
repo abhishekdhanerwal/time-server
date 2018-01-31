@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
 var UserModel = require('./models/User');
+var QuestionModel = require('./models/Question');
 
 var firebase = require("firebase");
 
@@ -35,6 +36,7 @@ firebase.initializeApp(config);
 
 var user = require('./routes/UserRoute')(app);
 var token = require('./routes/TokenRoute')(app);
+var question = require('./routes/QuestionRoute')(app);
 var google = require('./services/googleAuth')(app);
 var scheduler = require('./services/scheduler');
 
@@ -81,6 +83,36 @@ UserModel.findOne({email:newUser.email}, function (err, user) {
         console.log('user already present');
     }
 });
+
+var defaultQuestion = new QuestionModel({
+    morning:'2 + 3 = 5',
+    evening:'2 + 3 = 5',
+})
+
+QuestionModel.findOne({id:1}, function (err , question) {
+    if (err)
+        res.status(401).send({
+            message: 'Server not responding',
+            error: err
+        });
+    // throw err;
+
+    if(!question){
+        defaultQuestion.save(function (err) {
+            if (err)
+                res.status(401).send({
+                    message: 'Server not responding',
+                    error: err
+                });
+            // throw err;
+            else
+                console.log('default question created');
+        })
+    }
+    else {
+        console.log('default question already present');
+    }
+})
 
 var port = process.env.PORT || 8080;
 

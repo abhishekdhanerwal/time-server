@@ -88,11 +88,11 @@ module.exports = function(app) {
             };
             if(winners){
                 var announced = false;
-                var newWinner = {};
+                var newWinner = [];
                 _.each(winners, function (value , key) {
                     if(value.checkPoint == req.query.time){
                        announced = true;
-                        newWinner = value
+                        newWinner.push(value)
                     }
                 })
                 if(announced)
@@ -111,12 +111,12 @@ module.exports = function(app) {
     app.post('/createHash', function (req, res) {
         var salt = 'eCwWELxi';
         var hash = sha512(req.body.preHashString + salt);
-        console.log(hash);
+        // console.log(hash);
         res.send({success : true, hash: hash});
     });
 
     app.post('/PaymentStatus', function (req, res) {
-        console.log(req.body);
+        // console.log(req.body);
         res.send(req.body.status);
     })
 
