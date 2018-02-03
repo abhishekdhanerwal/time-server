@@ -5,8 +5,6 @@ var mongoose = require('mongoose');
 var UserModel = require('./models/User');
 var QuestionModel = require('./models/Question');
 
-var firebase = require("firebase");
-
 var emailVerification = require('./services/emailVerification');
 
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -26,14 +24,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-var config = {
-    apiKey: "AIzaSyBtauLk86wlanubPIbFdPOfyfL4Hvj1XZE",
-    authDomain: "crack-the-crock.firebaseapp.com",
-    // databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
-    // storageBucket: "<BUCKET>.appspot.com",
-};
-firebase.initializeApp(config);
-
 var user = require('./routes/UserRoute')(app);
 var token = require('./routes/TokenRoute')(app);
 var question = require('./routes/QuestionRoute')(app);
@@ -41,11 +31,11 @@ var google = require('./services/googleAuth')(app);
 var scheduler = require('./services/scheduler');
 
 
-if(env === 'development'){
-      mongoose.connect('mongodb://127.0.0.1/matka');
- }else {
+// if(env === 'development'){
+//       mongoose.connect('mongodb://127.0.0.1/matka');
+//  }else {
      mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds159997.mlab.com:59997/crackthecrock');
-}
+// }
 
 //by default admin
 var newUser = new UserModel({
