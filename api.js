@@ -7,7 +7,7 @@ var QuestionModel = require('./models/Question');
 
 var emailVerification = require('./services/emailVerification');
 
-var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+// var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var app = express();
 
@@ -31,9 +31,9 @@ var google = require('./services/googleAuth')(app);
 var scheduler = require('./services/scheduler');
 
 
-// if(env === 'development'){
-//       mongoose.connect('mongodb://127.0.0.1/matka');
-//  }else {
+ // if(env === 'development'){
+ //       mongoose.connect('mongodb://127.0.0.1/matka');
+  // }else {
      mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds159997.mlab.com:59997/crackthecrock');
 // }
 
@@ -43,6 +43,7 @@ var newUser = new UserModel({
     email: "abhishek@datiot.com",
     mobile: "9911866043",
     password: "secret",
+    newPassword: "secret",
     role:"admin",
     city:"gurgaon",
     state:"haryana",
@@ -104,7 +105,8 @@ QuestionModel.findOne({id:1}, function (err , question) {
     }
 })
 
-var port = process.env.PORT || 8080;
+// var port = process.env.PORT || 8080;
+var port = 8080;
 
 var server = app.listen(port , function () {
   console.log('server listening on '  + server.address().port);

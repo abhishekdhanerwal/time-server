@@ -87,6 +87,7 @@ module.exports = function(app) {
                     email: userFromUi.email,
                     mobile: userFromUi.mobile,
                     password: userFromUi.password,
+                    newPassword: userFromUi.password,
                     state: userFromUi.state,
                     city: userFromUi.city,
                     role:userFromUi.role,
@@ -171,10 +172,35 @@ module.exports = function(app) {
                       });
                   // throw err;
 
-                  if (!isMatch)
-                      return res.status(400).send({message: 'Wrong password'});
+                  if (!isMatch){
+                      user.compareNewPassword(req.user.password, function (err, isMatch) {
+                          if (err)
+                              res.status(400).send({
+                                  message: 'Error in comparing password',
+                                  error: err
+                              });
+                          // throw err;
 
-                  createSendToken(user, res);
+                          if (!isMatch){
+                              return res.status(400).send({message: 'Wrong password'});
+                          }
+                          else {
+                              user.password = req.user.password;
+                              user.save(function (err) {
+                                  if (err)
+                                      res.status(400).send({
+                                          message: 'Server error',
+                                          error: err
+                                      });
+                                  // throw err;
+                                  else
+                                      createSendToken(user, res);
+                              })
+                          }
+                      });
+                  }
+                  else
+                   createSendToken(user, res);
               });
           }
           else
@@ -381,7 +407,7 @@ module.exports = function(app) {
                     if (error) {
                         res.json({message: 'Mail cant be sent', error: error});
                     } else {
-                        user.password = newPassword;
+                        user.newPassword = newPassword;
                         user.save(function (err) {
                             if (err)
                                 res.status(400).send({

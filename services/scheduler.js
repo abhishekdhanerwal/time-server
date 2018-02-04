@@ -118,16 +118,23 @@ function generateWinner(time) {
                 tokenList.push(value);
         });
 
+        console.log('Token Length - ' + tokenList.length)
+
         if(tokenList.length > 0){
             console.log('First lucky draw - ' + new Date());
 
             var winner = [];
 
-            for(var index=0; index<Math.floor(0.2*(tokenList.length+1)) ; index++){
+            var totalWinners = Math.floor(0.4*(tokenList.length+1));
+            if(totalWinners == 0)
+                totalWinners = 1;
+
+            for(var index=0; index<totalWinners ; index++){
                 var indexArray = Math.floor(Math.random()*(tokenList.length));
                 winner.push(tokenList[indexArray]);
                 tokenList.splice(indexArray, 1);
             }
+            console.log('total Winner - ' + totalWinners);
             // var winner = tokenList[Math.floor(Math.random()*tokenList.length)];
             _.each(winner , function (valueWinner, keyWinner) {
                 User.findById(valueWinner.userId , function (err , user) {
