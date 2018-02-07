@@ -3,6 +3,8 @@ var bcrypt = require('bcrypt-nodejs');
 
 var userRole = require('../enums/user_role');
 var checkPointType = require('../enums/checkPoint');
+var paymentType = require('../enums/payment_type');
+var paymentStatus = require('../enums/payment_status');
 
 
 var UserSchema = new mongoose.Schema({
@@ -54,12 +56,34 @@ var UserSchema = new mongoose.Schema({
     googleLogin: {
         type: Boolean
     },
+    bankDetails:{
+        accountNumber:{
+            type:Number
+        },
+        ifsc:{
+            type:String
+        },
+        name:{
+            type:String
+        }
+    },
     history: [{
         token: {
             type: String
         },
+        paymentType:{
+            type: String,
+            enum:paymentType.module.payment
+        },
         date: {
             type: Date
+        },
+        amount:{
+            type:Number
+        },
+        paymentStatus:{
+            type: String,
+            enum:paymentStatus.module.request
         },
         checkPoint: {
             type: String,

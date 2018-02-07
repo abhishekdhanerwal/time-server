@@ -27,6 +27,7 @@ app.use(function (req, res, next) {
 var user = require('./routes/UserRoute')(app);
 var token = require('./routes/TokenRoute')(app);
 var question = require('./routes/QuestionRoute')(app);
+var payment = require('./routes/PaymentRoute')(app);
 var google = require('./services/googleAuth')(app);
 var scheduler = require('./services/scheduler');
 
@@ -34,7 +35,7 @@ var scheduler = require('./services/scheduler');
  // if(env === 'development'){
  //       mongoose.connect('mongodb://127.0.0.1/matka');
   // }else {
-     mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds159997.mlab.com:59997/crackthecrock');
+      mongoose.connect('mongodb://abhishekDhanerwal:Abhi123!@ds159997.mlab.com:59997/crackthecrock');
 // }
 
 //by default admin

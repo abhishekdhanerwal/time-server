@@ -109,7 +109,7 @@ module.exports = function(app) {
     });
 
     app.post('/createHash', function (req, res) {
-        var salt = 'eCwWELxi';
+        var salt = '051MPQenTG';
         var hash = sha512(req.body.preHashString + salt);
         // console.log(hash);
         res.send({success : true, hash: hash});
