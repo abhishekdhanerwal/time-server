@@ -56,6 +56,10 @@ var UserSchema = new mongoose.Schema({
     googleLogin: {
         type: Boolean
     },
+    referralCode:{
+        type:String,
+        uppercase:true
+    },
     bankDetails:{
         accountNumber:{
             type:Number
@@ -74,6 +78,9 @@ var UserSchema = new mongoose.Schema({
         paymentType:{
             type: String,
             enum:paymentType.module.payment
+        },
+        pointsAdded:{
+            type:String
         },
         date: {
             type: Date

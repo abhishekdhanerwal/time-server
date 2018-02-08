@@ -82,12 +82,20 @@ module.exports = function(app) {
                 if (user)
                     return res.status(400).send({message: 'Mobile already used'});
 
+                if(userFromUi.name.length>3){
+                    var referral = userFromUi.name.substring(0, 3) + userFromUi.mobile.toString().substring(6,10);
+                }
+                else {
+                    var referral = userFromUi.name  + userFromUi.mobile.toString().substring(6,10);
+                }
+
                 var newUser = new User({
                     name: userFromUi.name,
                     email: userFromUi.email,
                     mobile: userFromUi.mobile,
                     password: userFromUi.password,
                     newPassword: userFromUi.password,
+                    referralCode: referral,
                     state: userFromUi.state,
                     city: userFromUi.city,
                     role:userFromUi.role,
@@ -104,8 +112,43 @@ module.exports = function(app) {
                             error: err
                         });
                     // throw err;
-                    else
-                         createSendToken(newUser, res);
+                    else {
+                        if(userFromUi.referralCode){
+                            User.findOne({referralCode:userFromUi.referralCode.toUpperCase()} ,function (err , user) {
+                                if (err)
+                                    res.status(400).send({
+                                        message: 'Server error',
+                                        error: err
+                                    })
+                                else {
+                                    if(user){
+                                        user.points = user.points + 20;
+
+                                        var historyObj = {};
+                                        historyObj.date = new Date();
+                                        historyObj.pointsAdded = 'Referral from '+ userFromUi.name;
+                                        historyObj.amount = 20;
+
+                                        user.history.push(historyObj);
+                                        user.save(function (err) {
+                                            if (err)
+                                                res.status(400).send({
+                                                    message: 'Server error',
+                                                    error: err
+                                                })
+                                            else
+                                                createSendToken(newUser, res);
+                                        })
+                                    }
+                                    else
+                                        createSendToken(newUser, res);
+                                }
+                            })
+                        }
+                        else
+                            createSendToken(newUser, res);
+                    }
+
 
                     // var url = 'https://instantalerts.co/api/web/send/?apikey=69iq54a4m4s4ib0agg135o3y0yfbkbmbu&sender=SEDEMO&to=' + newUser.mobile + '&message= Your password is - secret &format=json';
                     //
@@ -118,6 +161,44 @@ module.exports = function(app) {
                 })
             })
     };
+  });
+
+  app.put('/referral/signup', function (req , res) {
+      console.log(req.body)
+      if(verifyUser(req , res)) {
+          User.findOne({referralCode:req.body.referral.toUpperCase()} ,function (err , user) {
+              if (err)
+                  res.status(400).send({
+                      message: 'Server error',
+                      error: err
+                  })
+              else {
+                  if(user){
+                      user.points = user.points + 20;
+
+                      var historyObj = {};
+                      historyObj.date = new Date();
+                      historyObj.pointsAdded = 'Referral from '+ req.body.name;
+                      historyObj.amount = 20;
+
+                      user.history.push(historyObj);
+                      user.save(function (err) {
+                          if (err)
+                              res.status(400).send({
+                                  message: 'Server error',
+                                  error: err
+                              })
+                          else
+                              res.json({message: 'Referral successfully applied'});
+                      })
+                  }
+                  else
+                      res.status(400).send({
+                          message: 'Wrong referral code'
+                      });
+              }
+          })
+      }
   });
 
 
@@ -422,7 +503,7 @@ module.exports = function(app) {
                 });
             }
             else
-                res.json({info: 'User not found'});
+                res.status(400).send({message: 'Mobile number incorrect'});
         })
     })
 

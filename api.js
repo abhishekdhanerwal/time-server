@@ -40,9 +40,9 @@ var scheduler = require('./services/scheduler');
 
 //by default admin
 var newUser = new UserModel({
-    name: "abhishek",
-    email: "abhishek@datiot.com",
-    mobile: "9911866043",
+    name: "kapil",
+    email: "kapilmaan086@gmail.com",
+    mobile: "9718420202",
     password: "secret",
     newPassword: "secret",
     role:"admin",
