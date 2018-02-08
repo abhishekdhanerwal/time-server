@@ -15,7 +15,7 @@ module.exports = function (app) {
                 Payment.find({type:req.query.type , paymentStatus:req.query.status}).populate('userId').exec
                 (function (err , payments) {
                     if (err) {
-                        res.json({message: 'error during find payment', error: err});
+                        res.status(400).send({message: 'error during find payment', error: err});
                     }
                     else {
                         res.status(200).send({
@@ -29,7 +29,7 @@ module.exports = function (app) {
                 Payment.find({paymentStatus:req.query.status}).populate('userId').exec
                 (function (err , payments) {
                     if (err) {
-                        res.json({message: 'error during find payment', error: err});
+                        res.status(400).send({message: 'error during find payment', error: err});
                     }
                     else {
                         res.status(200).send({
@@ -86,7 +86,7 @@ module.exports = function (app) {
 
                             user.save(function (err) {
                                 if (err) {
-                                    res.json({message: 'error during user update', error: err});
+                                    res.status(400).send({message: 'error during user update', error: err});
                                 }
                                 else {
                                     res.json({message: 'Payment request made successfully'})
@@ -103,18 +103,18 @@ module.exports = function (app) {
         if (verifyUser(req, res)) {
             Payment.findById(req.params.id , function (err , payment) {
                 if (err) {
-                    res.json({message: 'error during payment update', error: err});
+                    res.status(400).send({message: 'error during payment update', error: err});
                 }
                 else if(payment){
                     payment.paymentStatus = 'done';
                     payment.save(function (err) {
                         if (err) {
-                            res.json({message: 'error during payment update', error: err});
+                            res.status(400).send({message: 'error during payment update', error: err});
                         }
                         else {
                             User.findById(payment.userId , function (err , user) {
                                 if (err) {
-                                    res.json({message: 'error during user update', error: err});
+                                    res.status(400).send({message: 'error during user update', error: err});
                                 }
                                 else if(user){
                                     _.each(user.history , function (value , key) {
@@ -124,7 +124,7 @@ module.exports = function (app) {
                                     user.points = req.body.points;
                                     user.save(function (err) {
                                         if (err) {
-                                            res.json({message: 'error during user update', error: err});
+                                            res.status(400).send({message: 'error during user update', error: err});
                                         }
                                         else {
                                             res.json({message: 'payment updated successfully'})

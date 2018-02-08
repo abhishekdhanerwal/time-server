@@ -57,7 +57,7 @@ module.exports = function(app) {
     app.post('/user/upload', function(req, res) {
         upload(req,res,function(err){
                 if(err){
-                    res.json({error_code:1,err_desc:err});
+                    res.status(400).send({error_code:1,err_desc:err});
                     return;
                 }
                 // console.log(req.file.path)
@@ -137,11 +137,11 @@ module.exports = function(app) {
                                                     error: err
                                                 })
                                             else
-                                                createSendToken(newUser, res);
+                                                createSendToken(newUser, res , null);
                                         })
                                     }
                                     else
-                                        createSendToken(newUser, res);
+                                        createSendToken(newUser, res , null);
                                 }
                             })
                         }
@@ -275,13 +275,13 @@ module.exports = function(app) {
                                       });
                                   // throw err;
                                   else
-                                      createSendToken(user, res);
+                                      createSendToken(user, res , null);
                               })
                           }
                       });
                   }
                   else
-                   createSendToken(user, res);
+                   createSendToken(user, res , null);
               });
           }
           else
@@ -295,10 +295,10 @@ module.exports = function(app) {
 
         User.findOne({email: fbLogin.email}, function (err , user) {
             if (err) {
-                res.json({message: 'error during find user', error: err});
+                res.status(400).send({message: 'error during find user', error: err});
             };
             if (user) {
-                createSendToken(user, res);
+                createSendToken(user, res , 'present');
             }
             else {
                 var newUser = new User({
@@ -324,7 +324,7 @@ module.exports = function(app) {
                         });
                     // throw err;
                     else
-                        createSendToken(newUser, res);
+                        createSendToken(newUser, res , 'notpresent');
                 })
             }
         })
@@ -374,7 +374,7 @@ module.exports = function(app) {
         if(verifyUser(req , res)) {
             User.findById(req.params.id , function (err , user) {
                 if (err) {
-                    res.json({message: 'error during find user', error: err});
+                    res.status(400).send({message: 'error during find user', error: err});
                 };
                 if (user) {
                     user.comparePassword(req.body.password, function (err, isMatch) {
@@ -410,12 +410,12 @@ module.exports = function(app) {
         if(verifyUser(req , res)) {
             User.findById(req.params.id, function (err, user) {
                 if (err) {
-                    res.json({message: 'error during find user', error: err});
+                    res.status(400).send({message: 'error during find user', error: err});
                 };
                 if (user) {
                     res.json({message: 'User found successfully', user:user})
                 } else {
-                    res.json({info: 'User not found'});
+                    res.status(400).send({info: 'User not found'});
                 }
             })
         }
@@ -425,18 +425,18 @@ module.exports = function(app) {
         if(verifyUser(req , res)) {
             User.findById(req.params.id, function (err, user) {
                 if (err) {
-                    res.json({message: 'error during find user', error: err});
+                    res.status(400).send({message: 'error during find user', error: err});
                 };
                 if (user) {
                     _.merge(user, req.body);
                     user.save(function(err) {
                         if (err) {
-                            res.json({message: 'error during user update', error: err});
+                            res.status(400).send({message: 'error during user update', error: err});
                         };
                         res.json({message: 'User updated successfully'});
                     });
                 } else {
-                    res.json({info: 'User not found'});
+                    res.status(400).send({info: 'User not found'});
                 }
             })
         }
@@ -448,7 +448,7 @@ module.exports = function(app) {
         if(verifyUser(req , res)) {
             User.findById(req.params.id, function (err, user) {
                 if (err) {
-                    res.json({message: 'error during find user', error: err});
+                    res.status(400).send({message: 'error during find user', error: err});
                 };
                 if (user) {
                     var mailOptions = {
@@ -459,14 +459,14 @@ module.exports = function(app) {
                     // console.log(mailOptions);
                     smtpTransport.sendMail(mailOptions, function (error, response) {
                         if (error) {
-                            res.json({message: 'Mail cant be sent', error: error});
+                            res.status(400).send({message: 'Mail cant be sent', error: error});
                         } else {
                             res.json({message: 'Mail sent'});
                         }
                     });
                 }
                 else
-                    res.json({info: 'User not found'});
+                    res.status(400).send({info: 'User not found'});
             })
         }
     });
@@ -474,7 +474,7 @@ module.exports = function(app) {
     app.post('/forgotPassword' , function (req, res) {
         User.findOne({mobile: req.query.phoneNo},function (err, user) {
             if (err) {
-                res.json({message: 'error during find user', error: err});
+                res.status(400).send({message: 'error during find user', error: err});
             };
             if (user) {
                 var newPassword = randomstring.generate(7);
@@ -486,7 +486,7 @@ module.exports = function(app) {
                 // console.log(mailOptions);
                 smtpTransport.sendMail(mailOptions, function (error, response) {
                     if (error) {
-                        res.json({message: 'Mail cant be sent', error: error});
+                        res.status(400).send({message: 'Mail cant be sent', error: error});
                     } else {
                         user.newPassword = newPassword;
                         user.save(function (err) {
@@ -511,7 +511,7 @@ module.exports = function(app) {
         if(verifyUser(req , res)) {
             User.find(function (err , users) {
                 if (err) {
-                    res.json({message: 'error during find users', error: err});
+                    res.status(400).send({message: 'error during find users', error: err});
                 };
                 res.json({message:'User list generated successfully', data:users})
             })
@@ -544,7 +544,7 @@ module.exports = function(app) {
     }
   }
 
-  function createSendToken(user, res) {
+  function createSendToken(user, res , message) {
 
     var payload = {
       sub: user.id,
@@ -552,7 +552,7 @@ module.exports = function(app) {
     };
     var token = jwt.encode(payload, "matka");
 
-    res.status(200).send({user: user.toJson(), token: token});
+    res.status(200).send({user: user.toJson(), token: token , message: message});
   }
 
   function verifyUserObject(user , res) {

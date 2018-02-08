@@ -12,10 +12,10 @@ module.exports = function(app) {
         if(verifyUser(req, res)){
             Question.findOne({id: 1 }, function (err , question) {
                 if (err) {
-                    res.json({message: 'error during find question', error: err});
-                };
-                if (!question) {
-                    res.json({message: 'Question not found'});
+                    res.status(400).send({message: 'error during find question', error: err});
+                }
+                else if (!question) {
+                    res.status(400).send({message: 'Question not found'});
                 } else {
                     res.status(200).send({
                         message:'Questions found successfully',
@@ -33,10 +33,10 @@ module.exports = function(app) {
             if(req.query.time == checkPoint.module.checkPoint[0]){
                 Question.findOne({id:1}, function (err, question) {
                     if (err) {
-                        res.json({message: 'error during find question', error: err});
-                    };
-                    if (!question) {
-                        res.json({message: 'Question not found'});
+                        res.status(400).send({message: 'error during find question', error: err});
+                    }
+                    else if (!question) {
+                        res.status(400).send({message: 'Question not found'});
                     } else {
                         question[req.query.time] = req.body.question;
                         question.save(function (err) {

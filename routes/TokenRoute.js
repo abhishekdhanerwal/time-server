@@ -16,10 +16,10 @@ module.exports = function(app) {
         if(verifyUser(req, res)){
             User.findById(req.params.id , function (err , user) {
                 if (err) {
-                    res.json({message: 'error during find user', error: err});
-                };
-                if (!user) {
-                    res.json({message: 'User not found'});
+                    res.status(400).send({message: 'error during find user', error: err});
+                }
+                else if (!user) {
+                    res.status(400).send({message: 'User not found'});
                 } else {
                     generateCouponCode(function(couponCode){
                         var tokenDate = new Date();
@@ -51,22 +51,24 @@ module.exports = function(app) {
 
                             user.save(function (err) {
                                 if (err) {
-                                    res.json({message: 'error during user update', error: err});
-                                };
-
-                                newToken.save(function (err) {
-                                    if (err) {
-                                        res.json({message: 'error during token creation', error: err});
-                                    };
-
-                                    res.status(200).send({
-                                        message:'Coupon generated successfully',
-                                        data:{
-                                            token:couponCode,
-                                            user:user
+                                    res.status(400).send({message: 'error during user update', error: err});
+                                }
+                                else {
+                                    newToken.save(function (err) {
+                                        if (err) {
+                                            res.status(400).send({message: 'error during token creation', error: err});
+                                        }
+                                        else {
+                                            res.status(200).send({
+                                                message:'Coupon generated successfully',
+                                                data:{
+                                                    token:couponCode,
+                                                    user:user
+                                                }
+                                            })
                                         }
                                     })
-                                })
+                                }
                             })
                         }
                     })
@@ -84,9 +86,9 @@ module.exports = function(app) {
         Winner.find({date:tokenDate}).populate('userId').exec
         (function (err , winners) {
             if (err) {
-                res.json({message: 'error during find winners', error: err});
-            };
-            if(winners){
+                res.status(400).send({message: 'error during find winners', error: err});
+            }
+            else if(winners){
                 var announced = false;
                 var newWinner = [];
                 _.each(winners, function (value , key) {
@@ -105,6 +107,10 @@ module.exports = function(app) {
                     message:'Winner is not announced yet'
                 })
             }
+            else
+                res.status(200).send({
+                    message:'No winners'
+                })
         })
     });
 
@@ -132,7 +138,7 @@ module.exports = function(app) {
                 });
             // throw err;
 
-            if (token)
+           else if (token)
                 generateCouponCode();
             else
                 callback(couponCode);
